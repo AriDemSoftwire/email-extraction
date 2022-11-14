@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Collections;
 
 class ReadFromFile
 {
     static void Main()
     {
+        // Writing the output into a document
+
         //FileStream ostrm;
         //StreamWriter writer;
         //TextWriter oldOut = Console.Out;
         //ostrm = new FileStream(@"C:\Work\C#\EmailExtraction\Redirect.txt", FileMode.OpenOrCreate, FileAccess.Write);
         //writer = new StreamWriter(ostrm);
 
-        Regex pattern = new Regex(@"@softwire\.com$");
+        IDictionary<string, int> statistics = new Dictionary<string, int>();
+
+        Regex pattern = new Regex(@"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}");
+        string strPattern = "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}";
         int counter = 0;
         string[] finalArray = new string[0];
-        var emailCheck = "@softwire.com";
         string text = System.IO.File.ReadAllText(@"C:\Work\C#\EmailExtraction\sample.txt");
 
         string[] words = text.Split(
@@ -22,55 +28,50 @@ class ReadFromFile
             StringSplitOptions.None
             );
 
-
-
-
-        //foreach (string word in words)
-        //{
-
-        //    // Console.SetOut(writer);
-
-        //    Console.WriteLine(word);
-        //}
+        // Output settings 
 
         //Console.SetOut(oldOut);
         //writer.Close();
         //ostrm.Close();
+
         MatchCollection validEmails = pattern.Matches("initial");
+        int corndelCounter = 0;
         foreach (string word in words)
         {
-            //  Console.WriteLine(word);
-            int test = validEmails.Count;
-            validEmails = pattern.Matches(word);
-            int test2 = validEmails.Count;
 
-            if (test2 > test)
+            validEmails = pattern.Matches(word);
+            Boolean isMatch = Regex.IsMatch(word, strPattern);
+
+            if (isMatch)
             {
                 counter++;
-                Console.WriteLine(counter);
-                Console.WriteLine(word);
+                finalArray = finalArray.Append(word).ToArray();
+
+                int at = word.IndexOf("@");
+                string domain = word.Substring(at);
+
+                if (domain == "@corndel.com")
+                {
+                    corndelCounter++;
+                }
+
+                if (statistics.ContainsKey(domain))
+                {
+                    statistics[domain]++;
+                }
+                else
+                {
+                    statistics[domain] = 1;
+                }
             }
 
         }
 
-        //int testCounter = 0;
-        //foreach (string word in finalArray)
-        //{
-        //    Console.WriteLine(testCounter);
-        //    testCounter++;
-        //    Console.WriteLine(word);
-        //}
+        statistics.ToList().ForEach(x =>
+        {
+            Console.WriteLine(x.Key);
+            Console.WriteLine(x.Value);
+        });
+
     }
 }
-
-
-//foreach (string line in lines)
-//{
-//    string[] wordsInLine = line.Split(' ');
-//    words = words.Concat(wordsInLine).ToArray();
-//}
-
-//foreach (string word in words)
-//{
-//    Console.WriteLine(word);
-//}
